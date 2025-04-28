@@ -1,3 +1,4 @@
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Yup = require('yup');
@@ -7,33 +8,29 @@ const pool = require('../config/db');
 const registerSchema = Yup.object({
   username: Yup.string().min(3).required(),
   email: Yup.string().email().required(),
-  password: Yup.string().min(8).required()
+  password: Yup.string().min(8).required(),
 });
 
 // Schéma de validation Yup pour la connexion
 const loginSchema = Yup.object({
   email: Yup.string().email().required(),
-  password: Yup.string().required()
+  password: Yup.string().required(),
 });
 
 const userController = {
-  // Inscription
   async register(req, res) {
     try {
-      await registerSchema.validate(req.body);
+      console.log('Requête reçue pour /register:', req.body);
+      await registerSchema.validate(req.body, { abortEarly: false });
 
       const { username, email, password } = req.body;
 
-      // Vérifier si l'email existe déjà
       const emailExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
       if (emailExists.rows.length > 0) {
         return res.status(400).json({ message: 'Cet email est déjà utilisé.' });
       }
 
-      // Hacher le mot de passe
       const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Créer l'utilisateur
       const newUser = await pool.query(
         'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email',
         [username, email, hashedPassword]
@@ -41,30 +38,31 @@ const userController = {
 
       res.status(201).json({ user: newUser.rows[0], message: 'Utilisateur créé avec succès.' });
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      console.error('Erreur dans register:', error);
+      if (error.name === 'ValidationError') {
+        return res.status(400).json({ message: error.errors.join(', ') });
+      }
+      res.status(500).json({ message: 'Erreur serveur.' });
     }
   },
 
-  // Connexion
   async login(req, res) {
     try {
-      await loginSchema.validate(req.body);
+      console.log('Requête reçue pour /login:', req.body);
+      await loginSchema.validate(req.body, { abortEarly: false });
 
       const { email, password } = req.body;
 
-      // Vérifier si l'utilisateur existe
       const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
       if (user.rows.length === 0) {
         return res.status(400).json({ message: 'Email ou mot de passe incorrect.' });
       }
 
-      // Vérifier le mot de passe
       const validPassword = await bcrypt.compare(password, user.rows[0].password);
       if (!validPassword) {
         return res.status(400).json({ message: 'Email ou mot de passe incorrect.' });
       }
 
-      // Générer un token JWT
       const token = jwt.sign(
         { id: user.rows[0].id, email: user.rows[0].email },
         process.env.JWT_SECRET,
@@ -73,11 +71,14 @@ const userController = {
 
       res.json({ token, user: { id: user.rows[0].id, username: user.rows[0].username, email: user.rows[0].email } });
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      console.error('Erreur dans login:', error);
+      if (error.name === 'ValidationError') {
+        return res.status(400).json({ message: error.errors.join(', ') });
+      }
+      res.status(500).json({ message: 'Erreur serveur.' });
     }
   },
 
-  // Récupérer un utilisateur par ID
   async getUserById(req, res) {
     try {
       const { id } = req.params;
@@ -87,9 +88,10 @@ const userController = {
       }
       res.json(user.rows[0]);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error('Erreur dans getUserById:', error);
+      res.status(500).json({ message: 'Erreur serveur.' });
     }
-  }
+  },
 };
 
 module.exports = userController;

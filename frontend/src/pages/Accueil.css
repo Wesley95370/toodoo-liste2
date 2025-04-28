@@ -4,7 +4,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background-image: url('https://placehold.co/1920x1080/FF0000/000000/png?text=Volcano+Background');
+    background-image: url('../assets/volcano-background.jpg');
     background-size: cover;
     background-position: center;
     padding: 30px;
