@@ -1,0 +1,97 @@
+.connexion-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-image: url('../assets/volcano-background.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 30px;
+    font-family: 'Helvetica', 'Arial', sans-serif;
+  }
+  
+  .connexion-content {
+    background-color: rgba(255, 255, 255, 0.98);
+    padding: 40px;
+    border-radius: 12px;
+    max-width: 450px;
+    width: 100%;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .connexion-title {
+    color: #000000;
+    font-size: 2rem;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .connexion-error {
+    color: #000000;
+    text-align: center;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .connexion-form-group {
+    margin-bottom: 25px;
+  }
+  
+  .connexion-label {
+    color: #000000;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  .connexion-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .connexion-input:focus {
+    border-color: #333333;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .connexion-button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .connexion-button:hover {
+    background-color: #333333;
+    transform: translateY(-2px);
+  }
+  
+  .connexion-footer {
+    margin-top: 25px;
+    text-align: center;
+    color: #000000;
+    font-size: 0.95rem;
+  }
+  
+  .connexion-link {
+    color: #000000;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+  }
+  
+  .connexion-link:hover {
+    color: #333333;
+  }

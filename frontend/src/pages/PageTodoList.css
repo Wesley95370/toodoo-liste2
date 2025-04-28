@@ -1,0 +1,184 @@
+.todo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-image: url('../assets/volcano-background.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 30px;
+    font-family: 'Helvetica', 'Arial', sans-serif;
+  }
+  
+  .todo-content {
+    background-color: rgba(255, 255, 255, 0.98);
+    padding: 40px;
+    border-radius: 12px;
+    max-width: 700px;
+    width: 100%;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .todo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+  }
+  
+  .todo-title {
+    color: #000000;
+    font-size: 2rem;
+    font-weight: 400;
+  }
+  
+  .todo-logout-button {
+    padding: 12px 24px;
+    font-size: 1rem;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .todo-logout-button:hover {
+    background-color: #333333;
+    transform: translateY(-2px);
+  }
+  
+  .todo-form {
+    margin-bottom: 2.5rem;
+    border: 1px solid #000000;
+    padding: 25px;
+    border-radius: 12px;
+  }
+  
+  .todo-form-group {
+    margin-bottom: 25px;
+  }
+  
+  .todo-label {
+    color: #000000;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  .todo-input,
+  .todo-textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .todo-textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  .todo-input:focus,
+  .todo-textarea:focus {
+    border-color: #333333;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .todo-button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .todo-button:hover {
+    background-color: #333333;
+    transform: translateY(-2px);
+  }
+  
+  .todo-error {
+    color: #000000;
+    text-align: center;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .todo-empty {
+    text-align: center;
+    color: #000000;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .todo-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .todo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid #000000;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+  }
+  
+  .todo-item.done {
+    background-color: #F5F5F5;
+  }
+  
+  .todo-item-title {
+    margin: 0 0 8px 0;
+    color: #000000;
+    font-size: 1.3rem;
+    font-weight: 400;
+  }
+  
+  .todo-item.done .todo-item-title {
+    text-decoration: line-through;
+  }
+  
+  .todo-item-description {
+    margin: 0;
+    color: #000000;
+    font-size: 0.95rem;
+  }
+  
+  .todo-item-actions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .todo-toggle-button,
+  .todo-delete-button {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    background-color: #000000;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .todo-toggle-button:hover,
+  .todo-delete-button:hover {
+    background-color: #333333;
+    transform: translateY(-2px);
+  }

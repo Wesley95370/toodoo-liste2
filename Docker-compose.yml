@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: kevinjerome953/todolist-frontend:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:5000
+    networks:
+      - todolist-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: kevinjerome953/todolist-backend:latest
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=TodooPass2025!
+      - DB_NAME=todoo_db
+      - DB_PORT=5432
+      - JWT_SECRET=your_jwt_secret_key_here
+      - PORT=5000
+    networks:
+      - todolist-network
+
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=TodooPass2025!
+      - POSTGRES_DB=todoo_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"
+    networks:
+      - todolist-network
+
+volumes:
+  postgres_data:
+
+networks:
+  todolist-network:
+    driver: bridge
