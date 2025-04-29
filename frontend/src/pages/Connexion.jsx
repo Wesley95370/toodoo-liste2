@@ -1,67 +1,63 @@
-
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate, Link } from 'react-router-dom';
 import './Connexion.css';
 
-const Connexion = () => {
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+export default function Connexion() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
   useEffect(() => {
-    axios.get(`${API_URL}/api/csrf-token`, { withCredentials: true })
-      .then((response) => {
+    // Récupérer le jeton CSRF au chargement
+    const fetchCsrfToken = async () => {
+      try {
+        console.log('Tentative de récupération du jeton CSRF');
+        const response = await axios.get(`${API_URL}/api/csrf-token`, {
+          withCredentials: true,
+        });
+        console.log('Jeton CSRF reçu:', response.data.csrfToken);
         setCsrfToken(response.data.csrfToken);
-        console.log('Jeton CSRF récupéré:', response.data.csrfToken);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('Erreur lors de la récupération du jeton CSRF:', err);
         setError('Impossible de récupérer le jeton CSRF. Vérifiez votre connexion.');
-      });
+      }
+    };
+    fetchCsrfToken();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!csrfToken) {
-      setError('Jeton CSRF manquant. Veuillez réessayer.');
-      return;
-    }
-    if (isSubmitting) {
-      return;
-    }
+    setError('');
 
-    setIsSubmitting(true);
     try {
-      const payload = {
-        email,
-        password,
-      };
-      console.log('Données envoyées à /login:', payload);
+      console.log('Tentative de connexion avec:', { email, csrfToken });
       const response = await axios.post(
         `${API_URL}/api/users/login`,
-        payload,
+        { email, password },
         {
           headers: {
-            'X-CSRF-Token': csrfToken,
+            'X-CSRF-Token': csrfToken, // Réactivé
+            'Content-Type': 'application/json',
           },
           withCredentials: true,
         }
       );
-      localStorage.setItem('token', response.data.token);
       console.log('Connexion réussie:', response.data);
+
+      localStorage.setItem('token', response.data.token);
       navigate('/todo');
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Erreur lors de la connexion.';
-      setError(errorMessage);
-      console.error('Erreur connexion:', err.response?.data || err.message);
-    } finally {
-      setIsSubmitting(false);
+      console.error('Erreur lors de la connexion:', err);
+      if (err.response) {
+        setError(err.response.data.message || 'Erreur lors de la connexion.');
+      } else {
+        setError('Erreur réseau. Vérifiez votre connexion.');
+      }
     }
   };
 
@@ -74,33 +70,34 @@ const Connexion = () => {
           <div className="connexion-form-group">
             <label className="connexion-label">Email :</label>
             <input
+              className="connexion-input"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="connexion-input"
             />
           </div>
           <div className="connexion-form-group">
             <label className="connexion-label">Mot de passe :</label>
             <input
+              className="connexion-input"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="connexion-input"
             />
           </div>
-          <button type="submit" disabled={isSubmitting} className="connexion-button">
+          <button className="connexion-button" type="submit">
             Se connecter
           </button>
         </form>
         <p className="connexion-footer">
-          Pas de compte ? <a href="/inscription" className="inscription-link">S’inscrire</a>
+          Pas de compte ?{' '}
+          <Link className="connexion-link" to="/inscription">
+            Inscrivez-vous ici
+          </Link>
         </p>
       </div>
     </div>
   );
-};
-
-export default Connexion;
+}

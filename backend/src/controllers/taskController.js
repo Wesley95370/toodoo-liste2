@@ -1,83 +1,68 @@
-const Yup = require('yup');
 const pool = require('../config/db');
 
-// Schéma de validation Yup pour une tâche
-const taskSchema = Yup.object({
-  title: Yup.string().required(),
-  description: Yup.string().nullable()
-});
-
 const taskController = {
-  // Créer une tâche
-  async createTask(req, res) {
-    try {
-      await taskSchema.validate(req.body);
-
-      const { title, description } = req.body;
-      const userId = req.user.id; // Récupéré depuis le middleware d'authentification
-
-      const newTask = await pool.query(
-        'INSERT INTO tasks (title, description, user_id) VALUES ($1, $2, $3) RETURNING *',
-        [title, description, userId]
-      );
-
-      res.status(201).json({ task: newTask.rows[0], message: 'Tâche créée avec succès.' });
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  // Récupérer toutes les tâches d’un utilisateur
   async getTasksByUser(req, res) {
     try {
-      const userId = req.user.id;
-      const tasks = await pool.query('SELECT * FROM tasks WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+      const tasks = await pool.query('SELECT * FROM tasks WHERE user_id = $1', [req.user.id]);
+      console.log('Tâches récupérées pour user_id:', req.user.id);
       res.json(tasks.rows);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error('Erreur dans getTasksByUser:', error);
+      res.status(500).json({ message: 'Erreur serveur.', error: error.message });
     }
   },
 
-  // Mettre à jour une tâche
+  async createTask(req, res) {
+    try {
+      const { title, description } = req.body;
+      console.log('Création tâche pour user_id:', req.user.id, { title, description });
+      const newTask = await pool.query(
+        'INSERT INTO tasks (user_id, title, description) VALUES ($1, $2, $3) RETURNING *',
+        [req.user.id, title, description]
+      );
+      res.status(201).json(newTask.rows[0]);
+    } catch (error) {
+      console.error('Erreur dans createTask:', error);
+      res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    }
+  },
+
   async updateTask(req, res) {
     try {
-      await taskSchema.validate(req.body);
-
       const { id } = req.params;
       const { title, description, is_done } = req.body;
-      const userId = req.user.id;
-
-      const task = await pool.query('SELECT * FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
-      if (task.rows.length === 0) {
-        return res.status(404).json({ message: 'Tâche non trouvée ou non autorisée.' });
-      }
-
+      console.log('Mise à jour tâche ID:', id, 'pour user_id:', req.user.id);
       const updatedTask = await pool.query(
-        'UPDATE tasks SET title = $1, description = $2, is_done = $3 WHERE id = $4 RETURNING *',
-        [title, description, is_done, id]
+        'UPDATE tasks SET title = $1, description = $2, is_done = $3 WHERE id = $4 AND user_id = $5 RETURNING *',
+        [title, description, is_done, id, req.user.id]
       );
-
-      res.json({ task: updatedTask.rows[0], message: 'Tâche mise à jour avec succès.' });
+      if (updatedTask.rows.length === 0) {
+        console.log('Tâche non trouvée pour ID:', id);
+        return res.status(404).json({ message: 'Tâche non trouvée.' });
+      }
+      res.json(updatedTask.rows[0]);
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      console.error('Erreur dans updateTask:', error);
+      res.status(500).json({ message: 'Erreur serveur.', error: error.message });
     }
   },
 
-  // Supprimer une tâche
   async deleteTask(req, res) {
     try {
       const { id } = req.params;
-      const userId = req.user.id;
-
-      const task = await pool.query('SELECT * FROM tasks WHERE id = $1 AND user_id = $2', [id, userId]);
-      if (task.rows.length === 0) {
-        return res.status(404).json({ message: 'Tâche non trouvée ou non autorisée.' });
+      console.log('Suppression tâche ID:', id, 'pour user_id:', req.user.id);
+      const deletedTask = await pool.query(
+        'DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING *',
+        [id, req.user.id]
+      );
+      if (deletedTask.rows.length === 0) {
+        console.log('Tâche non trouvée pour ID:', id);
+        return res.status(404).json({ message: 'Tâche non trouvée.' });
       }
-
-      await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
-      res.json({ message: 'Tâche supprimée avec succès.' });
+      res.json({ message: 'Tâche supprimée.' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error('Erreur dans deleteTask:', error);
+      res.status(500).json({ message: 'Erreur serveur.', error: error.message });
     }
   }
 };

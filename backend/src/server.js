@@ -1,19 +1,19 @@
 /* eslint-disable */
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const csurf = require('csurf');
 const cookieParser = require('cookie-parser');
+// const csurf = require('csurf');
 const userRoutes = require('./routes/users');
 const taskRoutes = require('./routes/tasks');
+require('dotenv').config();
 
 const app = express();
 
-// Configuration des middlewares
+// Middleware pour parser les corps JSON
 app.use(express.json());
-app.use(cookieParser());
+
+// Configuration CORS
 app.use(cors({
   origin: [
     'http://localhost:3000',
@@ -24,58 +24,61 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
 }));
+
+// Middlewares de sécurité
 app.use(helmet());
+app.use(cookieParser());
 
-// Limite de requêtes (désactivée pour tester)
-// const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-// app.use(limiter);
+// Middleware pour journaliser les requêtes (APRES express.json())
+app.use((req, res, next) => {
+  console.log('Requête reçue:', {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: req.body,
+    cookies: req.cookies
+  });
+  next();
+});
 
-// Route de test
+// CSRF désactivé
+// const csrfProtection = csurf({ cookie: { httpOnly: true, secure: false } });
+// app.use(csrfProtection);
+
+// Route pour fournir le jeton CSRF (simulé)
+app.get('/api/csrf-token', (req, res) => {
+  console.log('Requête reçue pour /api/csrf-token depuis:', req.get('Origin'));
+  res.json({ csrfToken: 'disabled' });
+});
+
+// Route de santé
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ message: 'Serveur OK' });
+  console.log('Requête reçue pour /api/health');
+  res.json({ message: 'Serveur OK' });
 });
-
-// Initialisation du middleware CSRF
-const csrfProtection = csurf({ cookie: { httpOnly: true, secure: false } });
-
-// Route pour fournir le jeton CSRF
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-  try {
-    console.log('Requête reçue pour /api/csrf-token depuis:', req.get('Origin'));
-    const token = req.csrfToken();
-    console.log('Jeton CSRF généré:', token);
-    res.json({ csrfToken: token });
-  } catch (err) {
-    console.error('Erreur dans /api/csrf-token:', err);
-    res.status(500).json({ message: 'Erreur lors de la génération du jeton CSRF.', error: err.message });
-  }
-});
-
-// Protection CSRF pour les autres routes
-app.use(csrfProtection);
 
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Route racine
-app.get('/', (req, res) => {
-  res.send('API To-Do List is running');
-});
-
 // Gestion des erreurs globales
 app.use((err, req, res, next) => {
-  console.error('Erreur serveur:', err.stack);
+  console.error('Erreur serveur:', err);
   if (err.code === 'EBADCSRFTOKEN') {
+    console.log('Erreur CSRF: Jeton invalide pour requête:', {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body: req.body
+    });
     return res.status(403).json({ message: 'Jeton CSRF invalide.' });
   }
-  res.status(500).json({ message: 'Une erreur est survenue sur le serveur.', error: err.message });
-
-
+  res.status(500).json({ message: 'Erreur serveur.', error: err.message });
 });
 
-// Démarrer le serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;
