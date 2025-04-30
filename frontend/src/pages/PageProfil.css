@@ -11,10 +11,9 @@ html, body {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-image: url('../assets/volcano-background.jpg');
   background-size: cover;
   background-position: center;
-  margin: 0;
+  margin-right: 1000px;
   font-family: 'Helvetica', 'Arial', sans-serif;
 }
 
